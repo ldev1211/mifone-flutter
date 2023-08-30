@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Mifone</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>mitek.build.phone.mifone.flutter</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Allow MiFone to access your contacts. You can call your saved contacts directly from the app</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Use your BT headset</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Our app uses bluetooth to find, connect and transfer data between different devices</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Mifone will not use, store or communicate your location. The authorization allows us to detect Wifi connection changes</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Chúng tôi sử dụng thư viện âm thanh để lấy âm thanh nhạc chờ</string>
+	<key>NSAudioRecordingUsageDescription</key>
+	<string>Chúng tôi sử dụng quyền ghi âm để truyền audio âm thanh sang cho thiết bị đầu cuối nhận voice chat</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Chúng tôi sử dụng camera để ghi hình cho việc make video call</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Chúng tôi sử dụng quyền truy cập micro để audio call với thiết bị khác</string>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Add tranfered files to your library</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Share photos with your friends and customize avatars</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<string>external-accessory</string>
+		<string>fetch</string>
+		<string>processing</string>
+		<string>remote-notification</string>
+		<string>voip</string>
+	</array>
+	<key>FIVKIconName</key>
+	<string>AppIcon-VoIPKit</string>
+	<key>FIVKLocalizedName</key>
+	<string>VoIP-Kit</string>
+	<key>FIVKSupportVideo</key>
+	<true/>
+	<key>FIVKSkipRecallScreen</key>
+	<true/>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>dev.flutter.background.refresh</string>
+		<string>com.transistorsoft.customtask</string>
+		<string>com.transistorsoft.fetch</string>
+		<string>com.dsr-corporation.refresh-task</string>
+		<string>task-identifier</string>
+	</array>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
+</dict>
+</plist>
