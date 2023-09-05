@@ -34,9 +34,14 @@ import flutter_local_notifications
             } else if(call.method == "disable_flag_incoming"){
                 UserDefaults.standard.set(false, forKey: "isIncomingFlag")
                 UserDefaults.standard.set(false, forKey: "isEndCallFromPushkit")
+                result(true)
             } else if(call.method == "disable_flag_end_call") {
-                
-            }else if(call.method == "check_flag_end_call_from_pushkit"){
+                UserDefaults.standard.set(false, forKey: "isEndCallFromPushkit")
+                result(true)
+            } else if(call.method == "put_reactive_popup"){
+                UserDefaults.standard.set(true, forKey: "isReactiveOnPopup")
+                result(true)
+            } else if(call.method == "check_flag_end_call_from_pushkit"){
                 let preferences = UserDefaults.standard
                 let isEndCall = preferences.bool(forKey: "isEndCallFromPushkit") ?? false
                 result(isEndCall)
@@ -81,30 +86,47 @@ import flutter_local_notifications
 
     // Handle incoming pushes
     func pushRegistry(_ registry: PKPushRegistry, didReceiveIncomingPushWith payload: PKPushPayload, for type: PKPushType, completion: @escaping () -> Void) {
+        
         print("didReceiveIncomingPushWith")
+        print("didReceiveIncomingPushWith2")
+        print("didReceiveIncomingPushWith3")
+        print("didReceiveIncomingPushWith4")
 //        guard type == .voIP else { return }
-        print(payload.dictionaryPayload)
         let payloadApns : [AnyHashable : Any] = payload.dictionaryPayload["aps"] as? [AnyHashable : Any] ?? [:]
         let type = payloadApns["type"] as? String ?? ""
+        let callId = payloadApns["call-id"] as? String ?? ""
+        let callIdInShared = UserDefaults.standard.string(forKey: "call-id-curr") ?? ""
+        print(payloadApns)
+        if(type == "alert"){
+            let id = payloadApns["uuid"] as? String ?? "914abfa5-d0d6-4f05-83ee-1c0bed51f180"
+            let callerName = payloadApns["call-name"] as? String ?? ""
+            let userId = payloadApns["call-id"] as? String ?? ""
+            let handle = payloadApns["handle"] as? String ?? ""
+            let isVideo = payloadApns["isVideo"] as? Bool ?? false
+            let data = flutter_callkeep.Data(id: id, callerName: callerName, handle: handle, hasVideo: isVideo)
+            //set more data
+            print("PAYLOAD NATIVE: ")
+            print(payloadApns)
+            data.extra = ["userId": userId, "platform": "ios"]
+            data.appName = "Mifone"
+            //data.iconName = ...
+            //data.....
+            UserDefaults.standard.set(true, forKey: "isIncomingFlag")
+            SwiftCallKeepPlugin.sharedInstance?.displayIncomingCall(data, fromPushKit: true)
+            return
+        }
+        if((UserDefaults.standard.bool(forKey: "isReactiveOnPopup") ?? false) && type == "endcall"){
+            UserDefaults.standard.set(false,forKey: "isReactiveOnPopup")
+            UserDefaults.standard.set(false, forKey: "isEndCallFromPushkit")
+            UserDefaults.standard.set(false, forKey: "isIncomingFlag")
+            return
+        }
         if(type == "endcall"){
             UserDefaults.standard.set(true, forKey: "isEndCallFromPushkit")
+            UserDefaults.standard.set(false,forKey: "isReactiveOnPopup")
+            UserDefaults.standard.set(false, forKey: "isIncomingFlag")
             SwiftCallKeepPlugin.sharedInstance?.endAllCalls()
             return
         }
-        let id = payloadApns["uuid"] as? String ?? "914abfa5-d0d6-4f05-83ee-1c0bed51f180"
-        let callerName = payloadApns["call-name"] as? String ?? ""
-        let userId = payloadApns["call-id"] as? String ?? ""
-        let handle = payloadApns["handle"] as? String ?? "Cuộc gọi đến"
-        let isVideo = payloadApns["isVideo"] as? Bool ?? false
-        let data = flutter_callkeep.Data(id: id, callerName: callerName, handle: handle, hasVideo: isVideo)
-        //set more data
-        print("PAYLOAD NATIVE: ")
-        print(payloadApns)
-        data.extra = ["userId": userId, "platform": "ios"]
-        data.appName = "Done"
-        //data.iconName = ...
-        //data.....
-        UserDefaults.standard.set(true, forKey: "isIncomingFlag")
-        SwiftCallKeepPlugin.sharedInstance?.displayIncomingCall(data, fromPushKit: true)
     }
 }

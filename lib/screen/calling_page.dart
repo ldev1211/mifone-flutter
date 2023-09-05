@@ -344,6 +344,7 @@ class CallingPageState extends State<CallingPage> {
             if (stateCalling == CallingState.INCOMING_CALL) {
               callBloc.add(DeclineCallEvent());
             } else {
+              // widget.currCall!.hangup();
               callBloc.add(CancelCallEvent());
             }
           },

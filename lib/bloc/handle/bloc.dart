@@ -78,8 +78,17 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   WidgetsFlutterBinding.ensureInitialized();
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   Map<String, dynamic> data = message.data;
+  Map<String, dynamic> dataMessageRaw = message.toMap();
   String type = data['type'];
+  String uuidFcm = data['uuid'];
   print("Data from fcm: $data");
+  print("DataRaw from fcm: $dataMessageRaw");
+  if ((pref.getString('rejectUuidCall') ?? "") == uuidFcm ||
+      (pref.getString('acceptUuidCall') ?? "") == uuidFcm) {
+    await pref.setString('rejectUuidCall', "");
+    await pref.setString('acceptUuidCall', "");
+    return;
+  }
   if (type == "endcall") {
     await pref.setBool("isEndCallFromFCM", true);
     await CallKeep.instance.endAllCalls();
@@ -115,6 +124,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     if (event == null) return;
     switch (event.type) {
       case CallKeepEventType.callAccept:
+        await pref.setString("acceptUuidCall", uuidFcm);
         final data = event.data as CallKeepCallData;
         break;
       case CallKeepEventType.callDecline:
@@ -122,11 +132,12 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
           await pref.setBool("isEndCallFromFCM", false);
           await pref.setBool('isIncomingFromFCM', false);
           print("Have set isEndCallFromFCM, isIncomingFromFCM = false");
-          return;
+          exit(0);
         }
         SharedPreferences sharedPreferences =
             await SharedPreferences.getInstance();
         await sharedPreferences.setBool('isIncomingFromFCM', false);
+        await sharedPreferences.setString("rejectUuidCall", uuidFcm);
         helper ??= SIPUAHelper();
         UaSettings settings = UaSettings();
         Map<String, dynamic> mapJsonProfile =
@@ -171,7 +182,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         helper.start(settings);
       case CallKeepEventType.callTimedOut:
       case CallKeepEventType.callEnded:
-        print("Having disable flag");
         final data = event.data as CallKeepCallData;
         SharedPreferences sharedPreferences =
             await SharedPreferences.getInstance();
@@ -466,6 +476,9 @@ class HandleBloc extends Bloc<HandleEvent, HandleState>
       provisional: false,
       sound: true,
     );
+    FirebaseMessaging.onMessageOpenedApp.listen((event) {
+      print('DEBUGNOTIFY: Notify opened app: ${event.toMap()}');
+    });
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print('DEBUGNOTIFY: Notify foreground: ${message.toMap()}');

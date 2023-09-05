@@ -18,7 +18,6 @@ const Color colorMain = Color(0xFF0277BD);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await PreferenceUtils.init();
   await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

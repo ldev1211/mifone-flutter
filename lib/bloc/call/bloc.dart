@@ -34,7 +34,6 @@ class CallBloc extends Bloc<CallEvent, BlocCallState>
   late MediaStream _localStream;
 
   Future<void> registerSip() async {
-    helper ??= SIPUAHelper();
     FirebaseMessaging messaging = FirebaseMessaging.instance;
     UaSettings settings = UaSettings();
     Map<String, dynamic> mapJsonProfile =
@@ -103,10 +102,11 @@ class CallBloc extends Bloc<CallEvent, BlocCallState>
   }
 
   CallBloc() : super(BlocCallState()) {
+    helper ??= SIPUAHelper();
     helper.addSipUaHelperListener(this);
     on<InitEvent>((event, emit) async {
       if (event.isCallOut) {
-        await makeCall(phone: event.extension, voiceonly: true);
+        makeCall(phone: event.extension, voiceonly: true);
       } else {
         currCall = event.currCall;
       }
@@ -129,6 +129,8 @@ class CallBloc extends Bloc<CallEvent, BlocCallState>
           if (event == null) return;
           switch (event.type) {
             case CallKeepEventType.callAccept:
+              MethodChannel channel = const MethodChannel("channel_check_flag");
+              await channel.invokeMethod("put_reactive_popup");
               if (currCall != null) {
                 handleAcceptCall(call: currCall!, voiceonly: true);
               } else {
@@ -141,13 +143,14 @@ class CallBloc extends Bloc<CallEvent, BlocCallState>
                   .invokeMethod("check_flag_end_call_from_pushkit");
               if (isEndCallFromPushkit) {
                 disableFlagIncoming();
-                bool isCloseAppSuccess =
-                    await channel.invokeMethod("close_app");
-                if (isCloseAppSuccess) {
-                  exit(0);
+                if (helper.registered) {
+                  helper.unregister(true);
+                } else {
+                  exitApp();
                 }
                 return;
               }
+              await channel.invokeMethod("put_reactive_popup");
               if (currCall != null) {
                 currCall!.hangup({"cause": Causes.BUSY, "status_code": 486});
               } else {
@@ -176,17 +179,19 @@ class CallBloc extends Bloc<CallEvent, BlocCallState>
     on<DeclineCallEvent>((event, emit) {
       isDeclineCall = true;
       currCall!.hangup({"cause": Causes.BUSY, "status_code": 486});
-      emit(CallingState(CallingState.END_CALL, currCall!, isEnableSpeaker));
+      emit(CallingState(CallingState.END_CALL, currCall, isEnableSpeaker));
     });
 
-    on<CancelCallEvent>((event, emit) {
+    on<CancelCallEvent>((event, emit) async {
       isCancelCall = true;
       if (currCall != null) {
         currCall!.hangup();
       } else {
         helper.terminateSessions({});
       }
-      emit(CallingState(CallingState.END_CALL, currCall, isEnableSpeaker));
+      if (!isIncomingFromFCM && !isIncomingFlag) {
+        emit(CallingState(CallingState.END_CALL, currCall, isEnableSpeaker));
+      }
     });
 
     on<RemoveListenerSipEvent>((event, emit) {
@@ -256,7 +261,6 @@ class CallBloc extends Bloc<CallEvent, BlocCallState>
     print("MESSAGEFROMDARTSIPUA CALL STATE (CALL BLOC): ${state.state.name}");
     if (state.state == CallStateEnum.PROGRESS) {
       currCall = call;
-      print("isAnswerCall: $isAnswerCall");
       if (isAnswerCall) {
         handleAcceptCall(call: currCall!, voiceonly: true);
       }
@@ -265,14 +269,12 @@ class CallBloc extends Bloc<CallEvent, BlocCallState>
       }
     } else if (state.state == CallStateEnum.ENDED ||
         state.state == CallStateEnum.FAILED) {
-      print(
-          "isIncomingFlag = $isIncomingFlag, isIncomingFromFCM = $isIncomingFromFCM");
-      await CallKeep.instance.endAllCalls();
-      currCall = null;
+      currCall = call;
       if (_timer != null) _timer!.cancel();
       disableFlagIncoming();
       if (isIncomingFlag || isIncomingFromFCM) {
         helper.unregister(true);
+        // await CallKeep.instance.endAllCalls();
       }
 
       if (!isIncomingFlag && !isIncomingFromFCM) {
@@ -287,8 +289,10 @@ class CallBloc extends Bloc<CallEvent, BlocCallState>
       emit(CallingState(CallingState.ANSWER_CALL, call, isEnableSpeaker));
       add(StartTimerEvent());
     } else if (state.state == CallStateEnum.HOLD) {
+      currCall = call;
       _timer!.cancel();
     } else if (state.state == CallStateEnum.UNHOLD) {
+      currCall = call;
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
         countTime++;
         int m = countTime ~/ 60;
@@ -310,21 +314,26 @@ class CallBloc extends Bloc<CallEvent, BlocCallState>
     print("MESSAGEFROMDARTSIPUA: $ntf");
   }
 
+  Future<void> exitApp() async {
+    disableFlagIncoming();
+    if (Platform.isAndroid) {
+      SystemNavigator.pop(animated: true);
+    } else {
+      MethodChannel channel = const MethodChannel("channel_check_flag");
+      bool isCloseAppSuccess = await channel.invokeMethod("close_app");
+      if (isCloseAppSuccess) {
+        exit(0);
+      }
+    }
+  }
+
   @override
   void registrationStateChanged(RegistrationState state) async {
     // TODO: implement registrationStateChanged
     print("MESSAGEFROMDARTSIPUA: ${state.state}");
     if (state.state == RegistrationStateEnum.UNREGISTERED) {
       if (isIncomingFlag || isIncomingFromFCM) {
-        if (Platform.isAndroid) {
-          SystemNavigator.pop(animated: true);
-        } else {
-          MethodChannel channel = const MethodChannel("channel_check_flag");
-          bool isCloseAppSuccess = await channel.invokeMethod("close_app");
-          if (isCloseAppSuccess) {
-            exit(0);
-          }
-        }
+        await exitApp();
       }
     }
   }

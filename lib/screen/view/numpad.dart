@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class Dialer extends StatefulWidget {
   Dialer({super.key, required this.onNumberTapped, this.colorButtonDialer});
@@ -64,9 +63,9 @@ class _DialerState extends State<Dialer> {
       height: size,
       child: InkWell(
         onTap: () async {
-          SharedPreferences sharedPreferences =
-              await SharedPreferences.getInstance();
-          await sharedPreferences.setBool("isEndCallFromFCM", false);
+          // SharedPreferences sharedPreferences =
+          //     await SharedPreferences.getInstance();
+          // await sharedPreferences.setBool("isEndCallFromFCM", false);
           widget.onNumberTapped(number);
         },
         child: Column(
