@@ -205,7 +205,6 @@ class HandleBloc extends Bloc<HandleEvent, HandleState>
   int currType = 0;
   String from = "";
   bool isLogout = false;
-
   HandleBloc() : super(InitState()) {
     on<InitEvent>((event, emit) async {
       from = event.from;

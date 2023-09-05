@@ -9,12 +9,15 @@ class CallingState extends BlocCallState {
   static int ANSWER_CALL = 3;
   static int ACCEPT_CALL = 4;
   static int DECLINE_CALL = 5;
+  static int DISABLE_BUTTON = 6;
   final int callingState;
   final bool isEnableSpeaker;
   final Call? call;
 
   CallingState(this.callingState, this.call, this.isEnableSpeaker);
 }
+
+class DisableHangupButton extends BlocCallState {}
 
 class TimerSate extends BlocCallState {
   final String durationString;

@@ -5,8 +5,32 @@ import Firebase
 import flutter_callkeep
 import flutter_local_notifications
 
+
+class AppEventCallbackHandler: FlutterStreamHandler {
+    private var eventSink: FlutterEventSink?
+    
+    public func send(_ event: String, _ body: Any) {
+        let data: [String : Any] = [
+            "event": event,
+            "body": body
+        ]
+        eventSink?(data)
+    }
+    
+    func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        self.eventSink = events
+        return nil
+    }
+    
+    func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        self.eventSink = nil
+        return nil
+    }
+}
+
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate, PKPushRegistryDelegate {
+    var appEventCallbackHandler: AppEventCallbackHandler?
     override func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -25,6 +49,9 @@ import flutter_local_notifications
         voipRegistry.desiredPushTypes = [PKPushType.voIP]
         let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
         let checkFlagAnswerChannel = FlutterMethodChannel(name: "channel_check_flag",binaryMessenger: controller.binaryMessenger)
+        let flutterEventChannel = FlutterEventChannel(name: "channel_to_flutter", binaryMessenger: controller.binaryMessenger)
+        appEventCallbackHandler = AppEventCallbackHandler()
+        flutterEventChannel.setStreamHandler(appEventCallbackHandler as? FlutterStreamHandler & NSObjectProtocol)
         checkFlagAnswerChannel.setMethodCallHandler({(call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
               //This method is invoked on the UI thread.
             if(call.method == "check_flag_incoming"){
@@ -45,8 +72,13 @@ import flutter_local_notifications
                 let preferences = UserDefaults.standard
                 let isEndCall = preferences.bool(forKey: "isEndCallFromPushkit") ?? false
                 result(isEndCall)
+            } else if(call.method == "check_flag_has_incoming_occurred"){
+                let preferences = UserDefaults.standard
+                let isIncomingHasOccurred = preferences.bool(forKey: "isIncomingCallHasOccurred") ?? false
+                result(isIncomingHasOccurred)
             } else if(call.method == "close_app"){
                 UIControl().sendAction(#selector(URLSessionTask.suspend), to: UIApplication.shared, for: nil)
+                exit(0)
                 result(true)
             } else if(call.method == "show_display_callkit"){
                 let id = "914abfa5-d0d6-4f05-83ee-1c0bed51f180"
@@ -86,11 +118,7 @@ import flutter_local_notifications
 
     // Handle incoming pushes
     func pushRegistry(_ registry: PKPushRegistry, didReceiveIncomingPushWith payload: PKPushPayload, for type: PKPushType, completion: @escaping () -> Void) {
-        
         print("didReceiveIncomingPushWith")
-        print("didReceiveIncomingPushWith2")
-        print("didReceiveIncomingPushWith3")
-        print("didReceiveIncomingPushWith4")
 //        guard type == .voIP else { return }
         let payloadApns : [AnyHashable : Any] = payload.dictionaryPayload["aps"] as? [AnyHashable : Any] ?? [:]
         let type = payloadApns["type"] as? String ?? ""
@@ -119,11 +147,13 @@ import flutter_local_notifications
             UserDefaults.standard.set(false,forKey: "isReactiveOnPopup")
             UserDefaults.standard.set(false, forKey: "isEndCallFromPushkit")
             UserDefaults.standard.set(false, forKey: "isIncomingFlag")
+            appEventCallbackHandler?.send("Can close app", [])
             return
         }
         if(type == "endcall"){
             UserDefaults.standard.set(true, forKey: "isEndCallFromPushkit")
             UserDefaults.standard.set(false,forKey: "isReactiveOnPopup")
+            UserDefaults.standard.set(false, forKey: "isIncomingCallHasOccurred")
             UserDefaults.standard.set(false, forKey: "isIncomingFlag")
             SwiftCallKeepPlugin.sharedInstance?.endAllCalls()
             return

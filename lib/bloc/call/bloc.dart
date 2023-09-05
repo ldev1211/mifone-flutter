@@ -101,6 +101,19 @@ class CallBloc extends Bloc<CallEvent, BlocCallState>
     helper.call(phone, voiceonly: voiceonly, mediaStream: _localStream);
   }
 
+  Future<CallKeepEvent> handleEventFromIos(dynamic data) async {
+    if (data is Map) {
+      try {
+        await exitApp();
+        return CallKeepEvent.fromMap(data);
+      } catch (e) {
+        rethrow;
+      }
+    } else {
+      throw Exception('Incorrect event data: $data');
+    }
+  }
+
   CallBloc() : super(BlocCallState()) {
     helper ??= SIPUAHelper();
     helper.addSipUaHelperListener(this);
@@ -114,6 +127,10 @@ class CallBloc extends Bloc<CallEvent, BlocCallState>
       if (Platform.isIOS) {
         MethodChannel channel = const MethodChannel("channel_check_flag");
         isIncomingFlag = await channel.invokeMethod("check_flag_incoming");
+        const _eventChannel = EventChannel('channel_to_flutter');
+        _eventChannel.receiveBroadcastStream().listen((event) async {
+          await exitApp();
+        });
       } else {
         MethodChannel channel = const MethodChannel("my_channel");
         isAnswerCall = await channel.invokeMethod("checkFlagAnswer");
@@ -191,6 +208,9 @@ class CallBloc extends Bloc<CallEvent, BlocCallState>
       }
       if (!isIncomingFromFCM && !isIncomingFlag) {
         emit(CallingState(CallingState.END_CALL, currCall, isEnableSpeaker));
+      } else {
+        emit(CallingState(
+            CallingState.DISABLE_BUTTON, currCall, isEnableSpeaker));
       }
     });
 
@@ -273,8 +293,8 @@ class CallBloc extends Bloc<CallEvent, BlocCallState>
       if (_timer != null) _timer!.cancel();
       disableFlagIncoming();
       if (isIncomingFlag || isIncomingFromFCM) {
+        await CallKeep.instance.endAllCalls();
         helper.unregister(true);
-        // await CallKeep.instance.endAllCalls();
       }
 
       if (!isIncomingFlag && !isIncomingFromFCM) {
@@ -333,7 +353,9 @@ class CallBloc extends Bloc<CallEvent, BlocCallState>
     print("MESSAGEFROMDARTSIPUA: ${state.state}");
     if (state.state == RegistrationStateEnum.UNREGISTERED) {
       if (isIncomingFlag || isIncomingFromFCM) {
-        await exitApp();
+        if (Platform.isAndroid) {
+          await exitApp();
+        }
       }
     }
   }

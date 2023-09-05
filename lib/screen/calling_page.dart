@@ -6,6 +6,7 @@ import 'package:flutter_webrtc_mifone/bloc/call/state.dart';
 import 'package:flutter_webrtc_mifone/dart_sip/sip_ua_helper.dart';
 import 'package:flutter_webrtc_mifone/main.dart';
 import 'package:flutter_webrtc_mifone/screen/send_dtmf_page.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class CallingPage extends StatefulWidget {
   const CallingPage(
@@ -133,7 +134,8 @@ class CallingPageState extends State<CallingPage> {
                   const Spacer(),
                   BlocBuilder<CallBloc, BlocCallState>(
                     buildWhen: (prev, curr) {
-                      return curr is CallingState;
+                      return curr is CallingState ||
+                          curr is DisableHangupButton;
                     },
                     builder: (context, state) {
                       if (state is CallingState) {
@@ -163,7 +165,8 @@ class CallingPageState extends State<CallingPage> {
 
   Widget buildOptionAction(
       BuildContext context, int stateCalling, bool isEnableSpeaker) {
-    bool isAnswerCall = stateCalling == CallingState.ANSWER_CALL;
+    bool isAnswerCall = stateCalling == CallingState.ANSWER_CALL ||
+        stateCalling == CallingState.DISABLE_BUTTON;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -335,25 +338,37 @@ class CallingPageState extends State<CallingPage> {
 
   Widget buildAnswerDecline(BuildContext context, int stateCalling) {
     double size = 70;
+    if (stateCalling == CallingState.DISABLE_BUTTON) {
+      Fluttertoast.showToast(
+          msg: "Đang xử lý...",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+          fontSize: 20.0);
+    }
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         GestureDetector(
           onTap: () {
+            if (stateCalling == CallingState.DISABLE_BUTTON) return;
             if (stateCalling == CallingState.INCOMING_CALL) {
               callBloc.add(DeclineCallEvent());
             } else {
-              // widget.currCall!.hangup();
               callBloc.add(CancelCallEvent());
             }
           },
           child: Container(
             width: size,
             height: size,
-            decoration: const BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.all(Radius.circular(100))),
+            decoration: BoxDecoration(
+                color: (stateCalling == CallingState.DISABLE_BUTTON)
+                    ? Colors.red[200]
+                    : Colors.red,
+                borderRadius: const BorderRadius.all(Radius.circular(100))),
             child: const Icon(
               Icons.call_end,
               color: Colors.white,
