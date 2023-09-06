@@ -10,6 +10,12 @@ class InitEvent extends CallEvent {
   InitEvent(this.extension, this.isCallOut, this.currCall);
 }
 
+class UpdateNetworkStrengthEvent extends CallEvent {
+  String speedString;
+
+  UpdateNetworkStrengthEvent(this.speedString);
+}
+
 class CallingEvent extends CallEvent {
   static int INCOMING_CALL = 0;
   static int CALL_OUT = 1;

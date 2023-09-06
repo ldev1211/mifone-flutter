@@ -199,16 +199,23 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                   } else {
                     return Container(
                       margin: const EdgeInsets.only(left: 12),
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.check,
-                            color: Colors.orange,
+                          Container(
+                            width: 12,
+                            height: 12,
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                                color: Colors.orange,
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(50)),
+                                border: Border.all(
+                                    width: 1.5, color: Colors.white)),
                           ),
-                          Padding(padding: EdgeInsets.only(right: 4)),
-                          Text(
+                          const Padding(padding: EdgeInsets.only(right: 10)),
+                          const Text(
                             "Registering",
                             style:
                                 TextStyle(color: Colors.orange, fontSize: 15),

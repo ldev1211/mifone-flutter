@@ -46,6 +46,8 @@ class CallingPageState extends State<CallingPage> {
 
   @override
   Widget build(BuildContext contextScreen) {
+    double icSize = 18;
+    double fontSizeText = 12;
     return BlocProvider(
       create: (context) => callBloc,
       child: Builder(builder: (context) {
@@ -68,9 +70,171 @@ class CallingPageState extends State<CallingPage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  const Padding(padding: EdgeInsets.only(top: 60)),
+                  BlocBuilder<CallBloc, BlocCallState>(
+                    buildWhen: (prev, curr) {
+                      return curr is HandleRegistrationState;
+                    },
+                    builder: (context, state) {
+                      if (state is HandleRegistrationState) {
+                        if (state.registrationStateEnum ==
+                            RegistrationStateEnum.REGISTERED) {
+                          return Container(
+                            margin: const EdgeInsets.only(left: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 12,
+                                  height: 12,
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                      color: Colors.greenAccent,
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(50)),
+                                      border: Border.all(
+                                          width: 1.5, color: Colors.white)),
+                                ),
+                                const Padding(
+                                    padding: EdgeInsets.only(right: 12)),
+                                Text(
+                                  "Online",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: fontSizeText),
+                                )
+                              ],
+                            ),
+                          );
+                        } else {
+                          return Container(
+                            margin: const EdgeInsets.only(left: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 12,
+                                  height: 12,
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                      color: Colors.redAccent,
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(50)),
+                                      border: Border.all(
+                                          width: 1.5, color: Colors.white)),
+                                ),
+                                const Padding(
+                                    padding: EdgeInsets.only(right: 12)),
+                                Text(
+                                  "Offline",
+                                  style: TextStyle(
+                                      color: Colors.red[400],
+                                      fontSize: fontSizeText),
+                                )
+                              ],
+                            ),
+                          );
+                        }
+                      } else {
+                        return Container(
+                          margin: const EdgeInsets.only(left: 20),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 12,
+                                height: 12,
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                    color: Colors.orange,
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(50)),
+                                    border: Border.all(
+                                        width: 1.5, color: Colors.white)),
+                              ),
+                              const Padding(
+                                  padding: EdgeInsets.only(right: 12)),
+                              Text(
+                                "Registering",
+                                style: TextStyle(
+                                    color: Colors.orange,
+                                    fontSize: fontSizeText),
+                              )
+                            ],
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                  const Padding(padding: EdgeInsets.only(top: 8)),
+                  BlocBuilder<CallBloc, BlocCallState>(buildWhen: (prev, curr) {
+                    return curr is UpdateNetworkStrengthState;
+                  }, builder: (context, state) {
+                    if (state is UpdateNetworkStrengthState) {
+                      Icon ic;
+                      Text text;
+                      if (state.level == UpdateNetworkStrengthState.LOW) {
+                        ic = Icon(
+                          Icons.wifi_2_bar,
+                          color: Colors.redAccent,
+                          size: icSize,
+                        );
+                        text = Text(state.speedString,
+                            style: TextStyle(
+                                color: Colors.redAccent,
+                                fontSize: fontSizeText));
+                      } else if (state.level ==
+                          UpdateNetworkStrengthState.NORMAL) {
+                        ic = Icon(
+                          Icons.wifi_2_bar,
+                          color: Colors.white,
+                          size: icSize,
+                        );
+                        text = Text(state.speedString,
+                            style: TextStyle(
+                                color: Colors.white, fontSize: fontSizeText));
+                      } else {
+                        ic = Icon(
+                          Icons.wifi,
+                          color: Colors.white,
+                          size: icSize,
+                        );
+                        text = Text(state.speedString,
+                            style: TextStyle(
+                                color: Colors.white, fontSize: fontSizeText));
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.only(left: 20),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            ic,
+                            const Padding(padding: EdgeInsets.only(right: 8)),
+                            text
+                          ],
+                        ),
+                      );
+                    }
+                    return const Padding(
+                      padding: EdgeInsets.only(left: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Đang đo tốc độ mạng",
+                            style: TextStyle(color: Colors.white, fontSize: 14),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
                   Center(
                     child: Container(
-                      margin: const EdgeInsets.only(top: 100),
+                      margin: const EdgeInsets.only(top: 50),
                       width: 150,
                       height: 150,
                       decoration: const BoxDecoration(

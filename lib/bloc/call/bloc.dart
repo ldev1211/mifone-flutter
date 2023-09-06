@@ -12,6 +12,7 @@ import 'package:flutter_webrtc_mifone/api/entity/model/profile.dart';
 import 'package:flutter_webrtc_mifone/bloc/handle/bloc.dart';
 import 'package:flutter_webrtc_mifone/dart_sip/constants.dart';
 import 'package:flutter_webrtc_mifone/dart_sip/sip_ua_helper.dart';
+import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,6 +26,7 @@ class CallBloc extends Bloc<CallEvent, BlocCallState>
   bool isMute = false;
   bool isHold = false;
   Timer? _timer;
+  Timer? _checkNetworkStrength;
   int countTime = 0;
   bool isDeclineCall = false;
   bool isCancelCall = false;
@@ -114,11 +116,45 @@ class CallBloc extends Bloc<CallEvent, BlocCallState>
     }
   }
 
+  bool isFirstTestNetwork = true;
+
+  Future<String> checkNetworkSpeed() async {
+    final startTime = DateTime.now();
+    final response = await http.get(Uri.parse('https://www.google.com'));
+    final endTime = DateTime.now();
+
+    final duration = endTime.difference(startTime);
+    final speed =
+        ((response.bodyBytes.length / 1024) / duration.inMilliseconds * 1000) /
+            8;
+    return '${speed.toStringAsFixed(2)} KB/S';
+  }
+
   CallBloc() : super(BlocCallState()) {
     helper ??= SIPUAHelper();
     helper.addSipUaHelperListener(this);
+    _checkNetworkStrength =
+        Timer.periodic(const Duration(seconds: 1), (timer) async {
+      String speedString = await checkNetworkSpeed();
+      add(UpdateNetworkStrengthEvent(speedString));
+    });
+
+    on<UpdateNetworkStrengthEvent>((event, emit) async {
+      double transfer = double.parse(event.speedString.split(' ')[0]);
+      int level;
+      if (transfer < 10) {
+        level = UpdateNetworkStrengthState.LOW;
+      } else if (transfer >= 10 && transfer <= 30) {
+        level = UpdateNetworkStrengthState.NORMAL;
+      } else {
+        level = UpdateNetworkStrengthState.STRONG;
+      }
+      emit(UpdateNetworkStrengthState(level, event.speedString));
+    });
+
     on<InitEvent>((event, emit) async {
       if (event.isCallOut) {
+        emit(HandleRegistrationState(RegistrationStateEnum.REGISTERED));
         makeCall(phone: event.extension, voiceonly: true);
       } else {
         currCall = event.currCall;
@@ -194,6 +230,7 @@ class CallBloc extends Bloc<CallEvent, BlocCallState>
     });
 
     on<DeclineCallEvent>((event, emit) {
+      _checkNetworkStrength!.cancel();
       isDeclineCall = true;
       currCall!.hangup({"cause": Causes.BUSY, "status_code": 486});
       emit(CallingState(CallingState.END_CALL, currCall, isEnableSpeaker));
@@ -201,6 +238,7 @@ class CallBloc extends Bloc<CallEvent, BlocCallState>
 
     on<CancelCallEvent>((event, emit) async {
       isCancelCall = true;
+      _checkNetworkStrength!.cancel();
       if (currCall != null) {
         currCall!.hangup();
       } else {
@@ -351,7 +389,9 @@ class CallBloc extends Bloc<CallEvent, BlocCallState>
   void registrationStateChanged(RegistrationState state) async {
     // TODO: implement registrationStateChanged
     print("MESSAGEFROMDARTSIPUA: ${state.state}");
-    if (state.state == RegistrationStateEnum.UNREGISTERED) {
+    if (state.state == RegistrationStateEnum.REGISTERED) {
+      emit(HandleRegistrationState(state.state!));
+    } else if (state.state == RegistrationStateEnum.UNREGISTERED) {
       if (isIncomingFlag || isIncomingFromFCM) {
         if (Platform.isAndroid) {
           await exitApp();

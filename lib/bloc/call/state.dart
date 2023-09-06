@@ -17,6 +17,22 @@ class CallingState extends BlocCallState {
   CallingState(this.callingState, this.call, this.isEnableSpeaker);
 }
 
+class HandleRegistrationState extends BlocCallState {
+  RegistrationStateEnum registrationStateEnum;
+
+  HandleRegistrationState(this.registrationStateEnum);
+}
+
+class UpdateNetworkStrengthState extends BlocCallState {
+  static int LOW = 0;
+  static int NORMAL = 1;
+  static int STRONG = 2;
+  int level;
+  String speedString;
+
+  UpdateNetworkStrengthState(this.level, this.speedString);
+}
+
 class DisableHangupButton extends BlocCallState {}
 
 class TimerSate extends BlocCallState {

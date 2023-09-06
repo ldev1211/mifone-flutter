@@ -1,6 +1,9 @@
 PODS:
   - audioplayers_darwin (0.0.1):
     - Flutter
+  - connectivity_plus (0.0.1):
+    - Flutter
+    - ReachabilitySwift
   - contacts_service (0.2.2):
     - Flutter
   - CryptoSwift (1.7.1)
@@ -47,6 +50,8 @@ PODS:
   - flutter_callkeep (0.3.0):
     - CryptoSwift
     - Flutter
+  - flutter_internet_speed_test (1.0.0):
+    - Flutter
   - flutter_local_notifications (0.0.1):
     - Flutter
   - flutter_webrtc (0.9.31):
@@ -89,6 +94,7 @@ PODS:
   - permission_handler_apple (9.1.1):
     - Flutter
   - PromisesObjC (2.3.1)
+  - ReachabilitySwift (5.0.0)
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -97,12 +103,14 @@ PODS:
 
 DEPENDENCIES:
   - audioplayers_darwin (from `.symlinks/plugins/audioplayers_darwin/ios`)
+  - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - contacts_service (from `.symlinks/plugins/contacts_service/ios`)
   - ffmpeg_kit_flutter (from `.symlinks/plugins/ffmpeg_kit_flutter/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - Flutter (from `Flutter`)
   - flutter_callkeep (from `.symlinks/plugins/flutter_callkeep/ios`)
+  - flutter_internet_speed_test (from `.symlinks/plugins/flutter_internet_speed_test/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_webrtc (from `.symlinks/plugins/flutter_webrtc/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
@@ -124,12 +132,15 @@ SPEC REPOS:
     - GoogleUtilities
     - nanopb
     - PromisesObjC
+    - ReachabilitySwift
     - Toast
     - WebRTC-SDK
 
 EXTERNAL SOURCES:
   audioplayers_darwin:
     :path: ".symlinks/plugins/audioplayers_darwin/ios"
+  connectivity_plus:
+    :path: ".symlinks/plugins/connectivity_plus/ios"
   contacts_service:
     :path: ".symlinks/plugins/contacts_service/ios"
   ffmpeg_kit_flutter:
@@ -142,6 +153,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_callkeep:
     :path: ".symlinks/plugins/flutter_callkeep/ios"
+  flutter_internet_speed_test:
+    :path: ".symlinks/plugins/flutter_internet_speed_test/ios"
   flutter_local_notifications:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
   flutter_webrtc:
@@ -159,6 +172,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   audioplayers_darwin: 877d9a4d06331c5c374595e46e16453ac7eafa40
+  connectivity_plus: 413a8857dd5d9f1c399a39130850d02fe0feaf7e
   contacts_service: 849e1f84281804c8bfbec1b4c3eedcb23c5d3eca
   CryptoSwift: d3d18dc357932f7e6d580689e065cf1f176007c1
   ffmpeg-kit-ios-https: 8dffbe1623a2f227be98fc314294847a97f818e4
@@ -172,6 +186,7 @@ SPEC CHECKSUMS:
   FirebaseMessaging: bb2c4f6422a753038fe137d90ae7c1af57251316
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_callkeep: e94ee31d8797776cee91bf288c62ca4aa89fb5a8
+  flutter_internet_speed_test: 0fa50cf67c71323b8c61227e88b3a0f2478fbdef
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   flutter_webrtc: 02c023207f972145a3bc8c7aada86754f264d563
   fluttertoast: fafc4fa4d01a6a9e4f772ecd190ffa525e9e2d9c
@@ -182,6 +197,7 @@ SPEC CHECKSUMS:
   path_provider_foundation: eaf5b3e458fc0e5fbb9940fb09980e853fe058b8
   permission_handler_apple: e76247795d700c14ea09e3a2d8855d41ee80a2e6
   PromisesObjC: c50d2056b5253dadbd6c2bea79b0674bd5a52fa4
+  ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
   shared_preferences_foundation: 5b919d13b803cadd15ed2dc053125c68730e5126
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   WebRTC-SDK: 082ae4893212534a779ca233f19a9df8efd5f3bd
